@@ -1,8 +1,8 @@
-
 from dataclasses import dataclass
 
-from labtools.libs import numpy as np
-from labtools.misc import list_like
+from propeller.util import list_like
+
+import numpy as np
 
 from math import inf
 
@@ -139,6 +139,10 @@ class ErrVal:
     def __sub__(self, other):
         return self + (-1 * other)
 
+
+    def __neg__(self):
+        return 0 - self
+    
 
     def __rsub__(self, other):
         return other + (-1 * self)
