@@ -81,18 +81,11 @@ class DualOp(GenericOp):
     def _vars(self):
         return self.a._vars() + self.b._vars()
 
-    def apply(self, num):
-        return num
-
-    def prepend(self, op):
-        return DualOp(op, self)
-
     def __str__(self):
         return f"({str(self.a)} {self.op_type} {str(self.b)})"
 
     def _varcount(self):
         return self.a._varcount() + self.b._varcount()
-
 
     def _inc_ids(self, n):
         self.a._inc_ids(n)

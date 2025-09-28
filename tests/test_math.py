@@ -21,13 +21,17 @@ def dont_test_make_arr():
     assert isinstance(p.value(a), np.ndarray)
 
 
-def test_addition():
+def test_expr_builder():
     a, b, c, d = default_values()
 
     exp = a + b + c + d
     print(list(map(str, exp._vars())))
     print(str(exp))
     assert False
+
+
+def test_addition():
+    a, b, c, d = default_values()
 
     assert isinstance(a + b, p.GenericOp)
     assert float(a + d) == a.value
