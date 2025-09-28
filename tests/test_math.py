@@ -43,7 +43,7 @@ def test_addition_errors():
     a, b, c, d = default_values()
 
     assert p.error(a + b) == p.error(b + a)
-
+    assert p.error(a + b + c + d) == p.error((b + d) + (c + a))
 
 
 def dont_test_subtraction():
