@@ -1,18 +1,12 @@
+import copy
 import sympy
+import math
 
 
 def varname(i: int):
     lut = "abcdefghij"
     return "".join([lut[int(n)] for n in str(i)])
 
-
-def name_maker():
-    i = 0
-    while True:
-        yield varname(i)
-        i += 1
-
-varnames = name_maker()
 
 def ev(value, error):
     return ErrVal(value, error)
@@ -23,12 +17,15 @@ def isclose(a, b):
 
 
 def error(x):
-    return x.error
+    return x._cal_error()
 
 
 def value(x):
-    return x.value
+    return float(x)
 
+
+def sq(x):
+    return x * x
 
 class GenericOp:
     id = 0
@@ -43,13 +40,26 @@ class GenericOp:
 
     def _cal_error(self):
         sym_eq = self._to_symbolic_eq()
-        partials = [sympy.diff(sym_eq, var) for var in sym_eq.args()]
-        error = sum([sympy.sympify(partial).evalf() for partial in partials])
-        return error
+        vars = self.all_vars()
+
+        print(sym_eq)
+
+        error_sq = 0.0
+        for var in vars:
+            if isinstance(var, Number):
+                continue
+
+            partial = sympy.diff(sym_eq, str(var))
+            for v in vars:
+                partial.subs(str(v), v.value)
+            error_sq += sq(float(partial)) * sq(var.error)
+
+        return math.sqrt(error_sq)
 
 
     def _to_symbolic_eq(self):
-        eq = sympy.parsing.sympy_parser.parse_expr(str(self), evaluate=False)
+        # eq = sympy.parsing.sympy_parser.parse_expr(str(self), evaluate=False)
+        eq = sympy.sympify(str(self), evaluate=True)
         return eq
 
     
@@ -70,10 +80,10 @@ class GenericOp:
     
 class DualOp(GenericOp):
     def __init__(self, a, b):
-        self.a = a
-        self.b = b
+        print("making new dual op")
+        self.a = copy.deepcopy(a)
+        self.b = copy.deepcopy(b)
         self.b._inc_ids(self.a._varcount())
-
 
     def _eval(self):
         return 0.0
@@ -94,7 +104,7 @@ class DualOp(GenericOp):
 
 class SingularOp(GenericOp):
     def __init__(self, a):
-        self.a = a
+        self.a = copy.deepcopy(a)
 
     def __str__(self):
         return f"{self.op_type}({str(self.a)})"
@@ -139,6 +149,7 @@ class Number(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
         self.value = value
+        self.error = 0
 
     def _eval(self):
         return self.value

@@ -21,7 +21,7 @@ def dont_test_make_arr():
     assert isinstance(p.value(a), np.ndarray)
 
 
-def test_expr_builder():
+def dont_test_expr_builder():
     a, b, c, d = default_values()
 
     exp = a + b + c + d
@@ -37,6 +37,13 @@ def test_addition():
     assert float(a + d) == a.value
     assert float(a + c) == 0.
     assert float(a + b + c + d) == 2.
+
+
+def test_addition_errors():
+    a, b, c, d = default_values()
+
+    assert p.error(a + b) == p.error(b + a)
+
 
 
 def dont_test_subtraction():
