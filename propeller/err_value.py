@@ -27,6 +27,11 @@ def value(x):
 def sq(x):
     return x * x
 
+
+def primitive_num(x):
+    return isinstance(x, float) or isinstance(x, int)
+
+
 class GenericOp:
     id = 0
 
@@ -42,16 +47,15 @@ class GenericOp:
         sym_eq = self._to_symbolic_eq()
         vars = self.all_vars()
 
-        print(sym_eq)
-
         error_sq = 0.0
+
+        sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
         for var in vars:
             if isinstance(var, Number):
                 continue
 
             partial = sympy.diff(sym_eq, str(var))
-            for v in vars:
-                partial.subs(str(v), v.value)
+            partial = partial.subs(sub_vars)
             error_sq += sq(float(partial)) * sq(var.error)
 
         return math.sqrt(error_sq)
@@ -72,7 +76,34 @@ class GenericOp:
 
 
     def __add__(self, other):
+        if primitive_num(other):
+            return Addition(self, Number(other))
         return Addition(self, other)
+
+    def __radd__(self, other):
+        if primitive_num(other):
+            return Addition(Number(other), self)
+        return Addition(other, self)
+
+    def __mul__(self, other):
+        if primitive_num(other):
+            return Multiplication(self, Number(other))
+        return Multiplication(self, other)
+
+    def __rmul__(self, other):
+        if primitive_num(other):
+            return Multiplication(Number(other), self)
+        return Multiplication(other, self)
+
+    def __sub__(self, other):
+        if primitive_num(other):
+            return Subtraction(self, Number(other))
+        return Subtraction(self, other)
+    
+    def __rsub__(self, other):
+        if primitive_num(other):
+            return Subtraction(Number(other), self)
+        return Subtraction(other, self)
 
     def _inc_ids(self, n):
         self.id += n
@@ -80,7 +111,6 @@ class GenericOp:
     
 class DualOp(GenericOp):
     def __init__(self, a, b):
-        print("making new dual op")
         self.a = copy.deepcopy(a)
         self.b = copy.deepcopy(b)
         self.b._inc_ids(self.a._varcount())
@@ -126,6 +156,20 @@ class Addition(DualOp):
         return self.a._eval() + self.b._eval()
 
 
+class Multiplication(DualOp):
+    op_type = "*"
+
+    def _eval(self):
+        return self.a._eval() * self.b._eval()
+
+
+class Subtraction(DualOp):
+    op_type = "-"
+
+    def _eval(self):
+        return self.a._eval() - self.b._eval()
+
+
 class ErrVal(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
@@ -155,11 +199,11 @@ class Number(GenericOp):
         return self.value
 
     def __str__(self):
-        return varname(self.id)
+        return str(self.value)
 
     def _vars(self):
-        return [self]
+        return []
 
     def _varcount(self):
-        return 1
+        return 0
 

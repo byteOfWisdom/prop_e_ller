@@ -46,24 +46,23 @@ def test_addition_errors():
     assert p.error(a + b + c + d) == p.error((b + d) + (c + a))
 
 
-def dont_test_subtraction():
+def test_subtraction():
     a, b, c, d = default_values()
 
-    assert (a - b).value == -1.
-    assert (a - d).value == a.value
-    assert a - c == 2.
-
+    assert float(a - a) == 0.
+    assert float(a - b) == float(d - (b - a))
 
 def dont_test_negation():
     a, _, c, _ = default_values()
     assert -a == c
 
 
-def dont_test_mul():
+def test_mul():
     a, b, c, d = default_values()
-    assert (a * a).value == 1.
-    assert (b * c).value == -b.value
-    assert (a * d).value == 0.
+
+    assert float(a * d) == 0.
+    assert float(a * b) == float(b * a)
+    assert p.error(a * b) == p.error(b * a)
     
 
 def dont_test_div():
