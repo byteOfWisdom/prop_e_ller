@@ -12,10 +12,6 @@ def ev(value, error):
     return ErrVal(value, error)
 
 
-def isclose(a, b):
-    return True
-
-
 def error(x):
     return x._cal_error()
 
@@ -28,7 +24,7 @@ def sq(x):
     return x * x
 
 
-def primitive_num(x):
+def is_primitive_num(x):
     return isinstance(x, float) or isinstance(x, int)
 
 
@@ -49,12 +45,37 @@ class GenericOp:
 
         error_sq = 0.0
 
+        # numbers without error can just be substituted in
+        # saves derivations
+        for v in vars:
+            if isinstance(v, Number):
+                sym_eq = sym_eq.subs(str(v), float(v))
+                vars.remove(v)
+
+
+        # every occurance of a variable gets a different name
+        # these have to be deduplicated in order to achieve correct results
+        dedup_vars = []
+        for v in vars:
+            if vars.count(v) > 1:
+                alt_names = [str(vn) for vn in filter(lambda x: x == v, vars)]
+                for a_name in alt_names:
+                    sym_eq = sym_eq.subs(a_name, str(v))
+                    
+            dedup_vars.append(v)
+
+        vars = dedup_vars
+            
         sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
+        print(f"running for {sym_eq}")
+        print(sub_vars)
         for var in vars:
             if isinstance(var, Number):
                 continue
 
+            print(f"deriving wrt {str(var)}")
             partial = sympy.diff(sym_eq, str(var))
+            print(partial)
             partial = partial.subs(sub_vars)
             error_sq += sq(float(partial)) * sq(var.error)
 
@@ -76,34 +97,44 @@ class GenericOp:
 
 
     def __add__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Addition(self, Number(other))
         return Addition(self, other)
 
     def __radd__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Addition(Number(other), self)
         return Addition(other, self)
 
     def __mul__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Multiplication(self, Number(other))
         return Multiplication(self, other)
 
     def __rmul__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Multiplication(Number(other), self)
         return Multiplication(other, self)
 
     def __sub__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Subtraction(self, Number(other))
         return Subtraction(self, other)
     
     def __rsub__(self, other):
-        if primitive_num(other):
+        if is_primitive_num(other):
             return Subtraction(Number(other), self)
         return Subtraction(other, self)
+
+    def __truediv__(self, other):
+        if is_primitive_num(other):
+            return Division(self, Number(other))
+        return Division(self, other)
+
+    def __rtruediv__(self, other):
+        if is_primitive_num(other):
+            return Division(Number(other), self)
+        return Division(other, self)
 
     def _inc_ids(self, n):
         self.id += n
@@ -170,6 +201,13 @@ class Subtraction(DualOp):
         return self.a._eval() - self.b._eval()
 
 
+class Division(DualOp):
+    op_type = "/"
+
+    def _eval(self):
+        return self.a._eval() / self.b._eval()
+
+
 class ErrVal(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
@@ -182,6 +220,9 @@ class ErrVal(GenericOp):
     def __str__(self):
         return varname(self.id)
 
+    def __eq__(self, other):
+        return self.value == other.value and self.error == other.error
+
     def _vars(self):
         return [self]
 
@@ -190,7 +231,7 @@ class ErrVal(GenericOp):
 
 
 class Number(GenericOp):
-    def __init__(self, value: float, error: float):
+    def __init__(self, value: float):
         super().__init__()
         self.value = value
         self.error = 0
@@ -200,6 +241,9 @@ class Number(GenericOp):
 
     def __str__(self):
         return str(self.value)
+
+    def __eq__(self, other):
+        return self.value == other.value and self.error == other.error
 
     def _vars(self):
         return []

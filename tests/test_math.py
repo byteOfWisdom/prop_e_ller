@@ -65,22 +65,35 @@ def test_mul():
     assert p.error(a * b) == p.error(b * a)
     
 
-def dont_test_div():
+def test_ops_with_floats():
     a, b, c, d = default_values()
-    assert (a / b).value == 0.5
-
-
-def dont_test_commutation():
-    a, b, c, d = default_values()
-    assert a * b == b * a
-    assert a + b == b + a
-    assert a - b == - (b - a)
+    n = 2.0
+    assert float(a * n) == n
+    assert float(a + n) == float(n + a)
+    assert p.error(a + n) == p.error(n + a)
     
 
-def dont_test_associativity():
+def test_div():
     a, b, c, d = default_values()
-    assert p.isclose(a * (b * c), a * b * c)
-    assert p.isclose(a * (b + c), (a * b) + (a * c))
+
+    assert float(b / a) == float(b)
+    assert float(b / c) == float(1 / (c / b))
+    # todo: assert error correctnes 
+
+
+def test_associativity():
+    a, b, c, d = default_values()
+    assert float(a * (b * c)) == float((a * b) * c)
+    assert float(a + (b + c)) == float((a + b) + c)
+    assert p.error(a * (b * c)) == p.error((a * b) * c)
+    assert p.error(a + (b + c)) == p.error((a + b) + c)
+    
+
+def test_distributivity():
+    a, b, c, d = default_values()
+
+    assert float(a * (b + c)) == float(a * b + a * c)
+    assert p.error(a * (b + c)) == p.error(a * b + a * c)
     
 
 def dont_test_vector_ops():
