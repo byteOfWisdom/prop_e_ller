@@ -67,15 +67,11 @@ class GenericOp:
         vars = dedup_vars
             
         sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
-        print(f"running for {sym_eq}")
-        print(sub_vars)
         for var in vars:
             if isinstance(var, Number):
                 continue
 
-            print(f"deriving wrt {str(var)}")
             partial = sympy.diff(sym_eq, str(var))
-            print(partial)
             partial = partial.subs(sub_vars)
             error_sq += sq(float(partial)) * sq(var.error)
 
