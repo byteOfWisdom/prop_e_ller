@@ -204,6 +204,20 @@ class Division(DualOp):
         return self.a._eval() / self.b._eval()
 
 
+class Log(SingularOp):
+    op_type = "log"
+
+    def _eval(self):
+        return math.log(self.a._eval())
+
+
+class Sin(SingularOp):
+    op_type = "sin"
+
+    def _eval(self):
+        return math.sin(self.a._eval())
+
+
 class ErrVal(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
