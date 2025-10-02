@@ -1,7 +1,7 @@
 import copy
 import sympy
 import math
-
+from propeller.util import list_like
 
 def varname(i: int):
     lut = "abcdefghij"
@@ -17,7 +17,8 @@ def error(x):
 
 
 def value(x):
-    return float(x)
+    # return float(x)
+    return x()
 
 
 def sq(x):
@@ -32,6 +33,13 @@ class GenericOp:
     id = 0
 
     def __float__(self):
+        return self._eval()
+
+
+    def __call__(self):
+        return self._eval()
+
+    def __invert__(self):
         return self._eval()
 
 
@@ -92,6 +100,25 @@ class GenericOp:
         return "not implemented!!!"
 
 
+    def __eq__(self, other):
+        return ~self == ~other if isinstance(other, GenericOp) else other
+
+
+    def __neq__(self, other):
+        return ~self != ~other if isinstance(other, GenericOp) else other
+
+
+    def __gt__(self, other):
+        return ~self > ~other if isinstance(other, GenericOp) else other
+
+    def __lt__(self, other):
+        return ~self < ~other if isinstance(other, GenericOp) else other
+
+
+
+    
+
+
     def __add__(self, other):
         if is_primitive_num(other):
             return Addition(self, Number(other))
@@ -132,8 +159,27 @@ class GenericOp:
             return Division(Number(other), self)
         return Division(other, self)
 
+    def __neg__(self):
+        return Subtraction(Number(0), self)
+
+    def exp(self):
+        return Exp(self)
+
+    def log(self):
+        return Log(self)
+
+    def sin(self):
+        return Sin(self)
+
+    def cos(self):
+        return Cos(self)
+
+    def tan(self):
+        return Tan(self)
+
     def _inc_ids(self, n):
         self.id += n
+
 
     
 class DualOp(GenericOp):
@@ -204,6 +250,13 @@ class Division(DualOp):
         return self.a._eval() / self.b._eval()
 
 
+class Exp(SingularOp):
+    op_type = "exp"
+
+    def _eval(self):
+        return math.exp(self.a._eval())
+
+
 class Log(SingularOp):
     op_type = "log"
 
@@ -218,20 +271,38 @@ class Sin(SingularOp):
         return math.sin(self.a._eval())
 
 
-class ErrVal(GenericOp):
+class Cos(SingularOp):
+    op_type = "cos"
+
+    def _eval(self):
+        return math.cos(self.a._eval())
+
+
+class Tan(SingularOp):
+    op_type = "tan"
+
+    def _eval(self):
+        return math.tan(self.a._eval())
+
+
+class LiteralContainer(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
+        if list_like(value):
+            pass
         self.value = value
         self.error = error
 
     def _eval(self):
         return self.value
 
-    def __str__(self):
-        return varname(self.id)
-
     def __eq__(self, other):
         return self.value == other.value and self.error == other.error
+
+
+class ErrVal(LiteralContainer):
+    def __str__(self):
+        return varname(self.id)
 
     def _vars(self):
         return [self]
@@ -240,20 +311,12 @@ class ErrVal(GenericOp):
         return 1
 
 
-class Number(GenericOp):
+class Number(LiteralContainer):
     def __init__(self, value: float):
-        super().__init__()
-        self.value = value
-        self.error = 0
-
-    def _eval(self):
-        return self.value
+        super().__init__(value, 0)
 
     def __str__(self):
         return str(self.value)
-
-    def __eq__(self, other):
-        return self.value == other.value and self.error == other.error
 
     def _vars(self):
         return []

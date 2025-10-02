@@ -52,9 +52,26 @@ def test_subtraction():
     assert float(a - a) == 0.
     assert float(a - b) == float(d - (b - a))
 
-def dont_test_negation():
+
+def test_log_exp():
+    a, b, c, d = default_values()
+
+    assert float(np.exp(a)) == np.exp(1.)
+    assert float(np.exp(np.log(b))) == float(b)
+    assert float(np.log(b)) == np.log(2.)
+
+
+def test_trig_funcs():
+    a, b, c, d = default_values()
+
+    assert float(np.sin(d)) == 0.
+    assert float(np.cos(d)) == 1.
+    assert float(np.tan(d)) == float(np.sin(d) / np.cos(d))
+
+
+def test_negation():
     a, _, c, _ = default_values()
-    assert -a == c
+    assert float(-a) == float(c)
 
 
 def test_mul():
@@ -96,9 +113,11 @@ def test_distributivity():
     assert p.error(a * (b + c)) == p.error(a * b + a * c)
     
 
-def dont_test_vector_ops():
+def test_vector_ops():
     a, b, c, d = default_values()
     v = p.ev(np.linspace(1, 1, 10), 1)
+    va = ~(v * a)
+    assert isinstance(va, np.ndarray)
     assert (v * a == a * v).all()
     assert (v + a == a + v).all()
-    assert (v / a == 1. / (a / v)).any()
+    assert (v / a == 1. / (a / v)).all()
