@@ -12,6 +12,10 @@ def ev(value, error):
     return ErrVal(value, error)
 
 
+def ve(generic_expr):
+    return generic_expr(), generic_expr._cal_error()
+
+
 def error(x):
     return x._cal_error()
 
@@ -39,6 +43,8 @@ class GenericOp:
     def __call__(self):
         return self._eval()
 
+    # syntactic sugar... maybe reconsider
+    # but maybe i like this
     def __invert__(self):
         return self._eval()
 
@@ -48,15 +54,28 @@ class GenericOp:
 
 
     def _cal_error(self):
-        sym_eq = self._to_symbolic_eq()
-        vars = self.all_vars()
+        sym_eq, vars = self._to_symbolic_eq()
+        vec_len = max([len(v.value()) if v.vec() else 0 for v in vars])
+        error_sq = [0. for _ in range(vec_len)] if vec_len else 0.
+            
+        sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
+        for var in vars:
+            partial = sympy.diff(sym_eq, str(var))
+            partial = partial.subs(sub_vars)
+            error_sq += sq(float(partial)) * sq(var.error)
 
-        error_sq = 0.0
+        return math.sqrt(error_sq)
+
+
+    def _to_symbolic_eq(self):
+        # eq = sympy.parsing.sympy_parser.parse_expr(str(self), evaluate=False)
+        sym_eq = sympy.sympify(str(self), evaluate=True)
+        vars = self.all_vars()
 
         # numbers without error can just be substituted in
         # saves derivations
         for v in vars:
-            if isinstance(v, Number):
+            if isinstance(v, Number) and not v.vec():
                 sym_eq = sym_eq.subs(str(v), float(v))
                 vars.remove(v)
 
@@ -72,24 +91,7 @@ class GenericOp:
                     
             dedup_vars.append(v)
 
-        vars = dedup_vars
-            
-        sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
-        for var in vars:
-            if isinstance(var, Number):
-                continue
-
-            partial = sympy.diff(sym_eq, str(var))
-            partial = partial.subs(sub_vars)
-            error_sq += sq(float(partial)) * sq(var.error)
-
-        return math.sqrt(error_sq)
-
-
-    def _to_symbolic_eq(self):
-        # eq = sympy.parsing.sympy_parser.parse_expr(str(self), evaluate=False)
-        eq = sympy.sympify(str(self), evaluate=True)
-        return eq
+        return sym_eq, dedup_vars
 
     
     def __int__(self):
@@ -167,6 +169,9 @@ class GenericOp:
 
     def log(self):
         return Log(self)
+
+    def log10(self):
+        return Log10(self)
 
     def sin(self):
         return Sin(self)
@@ -264,6 +269,13 @@ class Log(SingularOp):
         return math.log(self.a._eval())
 
 
+class Log10(SingularOp):
+    op_type = "log10"
+
+    def _eval(self):
+        return math.log10(self.a._eval())
+
+
 class Sin(SingularOp):
     op_type = "sin"
 
@@ -293,11 +305,16 @@ class LiteralContainer(GenericOp):
         self.value = value
         self.error = error
 
+    def vec(self):
+        return list_like(self.value)
+
     def _eval(self):
         return self.value
 
     def __eq__(self, other):
-        return self.value == other.value and self.error == other.error
+        if self.vec() or other.vec():
+            return (self.value == other.value).all() and (self.error == other.error).all()
+        return (self.value == other.value) and (self.error == other.error)
 
 
 class ErrVal(LiteralContainer):

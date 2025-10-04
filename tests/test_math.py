@@ -59,6 +59,8 @@ def test_log_exp():
     assert float(np.exp(a)) == np.exp(1.)
     assert float(np.exp(np.log(b))) == float(b)
     assert float(np.log(b)) == np.log(2.)
+    assert float(np.log10(b)) == np.log10(float(b))
+    # todo: assert correct errors
 
 
 def test_trig_funcs():
@@ -67,6 +69,7 @@ def test_trig_funcs():
     assert float(np.sin(d)) == 0.
     assert float(np.cos(d)) == 1.
     assert float(np.tan(d)) == float(np.sin(d) / np.cos(d))
+    # todo: assert correct errors
 
 
 def test_negation():
@@ -115,9 +118,14 @@ def test_distributivity():
 
 def test_vector_ops():
     a, b, c, d = default_values()
-    v = p.ev(np.linspace(1, 1, 10), 1)
+    v = p.ev(np.linspace(0, 1, 10), 1)
+    differing_errors = p.ev(np.linspace(0, 1, 10), np.linspace(0, 1, 10))
     va = ~(v * a)
+    res, err = p.ve(differing_errors * v)
+    assert isinstance(err, np.ndarray)
+    assert (res == va).all()
     assert isinstance(va, np.ndarray)
     assert (v * a == a * v).all()
     assert (v + a == a + v).all()
     assert (v / a == 1. / (a / v)).all()
+    assert (p.value(v * b) == v * p.value(b)).all()
