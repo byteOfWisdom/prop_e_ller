@@ -118,10 +118,12 @@ def test_distributivity():
 
 def test_vector_ops():
     a, b, c, d = default_values()
+    many_ones = np.zeros(10)
+    many_ones = 1.
     v = p.ev(np.linspace(0, 1, 10), 1)
-    differing_errors = p.ev(np.linspace(0, 1, 10), np.linspace(0, 1, 10))
+    differing_errors = p.ev(many_ones, np.linspace(0, 1, 10))
     va = ~(v * a)
-    res, err = p.ve(differing_errors * v)
+    res, err = p.ve(v * differing_errors)
     assert isinstance(err, np.ndarray)
     assert (res == va).all()
     assert isinstance(va, np.ndarray)
