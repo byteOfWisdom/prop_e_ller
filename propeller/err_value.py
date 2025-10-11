@@ -14,7 +14,7 @@ def ev(value, error):
     if list_like(value) and not list_like(error):
         return np.array([ev(x, error) for x in value])
     elif list_like(value):
-        return np.array([ev(x, y) for x, y in zip(error, value)])
+        return np.array([ev(x, y) for x, y in zip(value, error)])
     else:
         return ErrVal(value, error)
 
@@ -94,7 +94,6 @@ class GenericOp:
         # these have to be deduplicated in order to achieve correct results
         dedup_vars = []
         for v in vars:
-            print(vars.count(v))
             if vars.count(v) > 1:
                 alt_names = [str(vn) for vn in filter(lambda x: x == v, vars)]
                 for a_name in alt_names:
@@ -111,6 +110,10 @@ class GenericOp:
 
     def __str__(self):
         return "not implemented!!!"
+
+
+    def __repr__(self):
+        return str(self)
 
 
     def __eq__(self, other):
@@ -145,51 +148,27 @@ class GenericOp:
 
     def __add__(self, other):
         return self._lop(Addition, other)
-        if is_primitive_num(other):
-            return Addition(self, Number(other))
-        return Addition(self, other)
 
     def __radd__(self, other):
         return self._rop(Addition, other)
-        if is_primitive_num(other):
-            return Addition(Number(other), self)
-        return Addition(other, self)
 
     def __mul__(self, other):
         return self._lop(Multiplication, other)
-        if is_primitive_num(other):
-            return Multiplication(self, Number(other))
-        return Multiplication(self, other)
 
     def __rmul__(self, other):
         return self._rop(Multiplication, other)
-        if is_primitive_num(other):
-            return Multiplication(Number(other), self)
-        return Multiplication(other, self)
 
     def __sub__(self, other):
         return self._lop(Subtraction, other)
-        if is_primitive_num(other):
-            return Subtraction(self, Number(other))
-        return Subtraction(self, other)
     
     def __rsub__(self, other):
-        return self._lop(Subtraction, other)
-        if is_primitive_num(other):
-            return Subtraction(Number(other), self)
-        return Subtraction(other, self)
+        return self._rop(Subtraction, other)
 
     def __truediv__(self, other):
         return self._lop(Division, other)
-        if is_primitive_num(other):
-            return Division(self, Number(other))
-        return Division(self, other)
 
     def __rtruediv__(self, other):
         return self._rop(Division, other)
-        if is_primitive_num(other):
-            return Division(Number(other), self)
-        return Division(other, self)
 
     def __neg__(self):
         return Number(0) - self
