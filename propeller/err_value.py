@@ -33,7 +33,7 @@ def error(x):
 
 def value(x):
     # return float(x)
-    return x()
+    return ~x
 
 
 def sq(x):
@@ -115,20 +115,22 @@ class GenericOp:
     def __repr__(self):
         return str(self)
 
+    def _comp(self, other, op):
+        if not isinstance(other, GenericOp):
+            return op(~self, other)
+        return op(~self, ~other)
 
     def __eq__(self, other):
-        return ~self == ~other
-
+        return self._comp(other, lambda x, y: x == y)
 
     def __neq__(self, other):
-        return ~self != ~other
-
+        return self._comp(other, lambda x, y: x != y)
 
     def __gt__(self, other):
-        return ~self > ~other
+        return self._comp(other, lambda x, y: x > y)
 
     def __lt__(self, other):
-        return ~self < ~other
+        return self._comp(other, lambda x, y: x < y)
 
 
     def _rop(self, op, other):
