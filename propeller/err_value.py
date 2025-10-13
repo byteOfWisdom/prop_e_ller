@@ -1,6 +1,5 @@
 import copy
 import sympy
-import math
 from propeller.util import list_like
 import numpy as np
 
@@ -204,6 +203,9 @@ class GenericOp:
     def tan(self):
         return Tan(self)
 
+    def abs(self):
+        return Abs(self)
+
     def _inc_ids(self, n):
         self.id += n
 
@@ -281,43 +283,49 @@ class Exp(SingularOp):
     op_type = "exp"
 
     def _eval(self):
-        return math.exp(self.a._eval())
+        return np.exp(self.a._eval())
 
 
 class Log(SingularOp):
     op_type = "log"
 
     def _eval(self):
-        return math.log(self.a._eval())
+        return np.log(self.a._eval())
 
 
 class Log10(SingularOp):
     op_type = "log10"
 
     def _eval(self):
-        return math.log10(self.a._eval())
+        return np.log10(self.a._eval())
 
 
 class Sin(SingularOp):
     op_type = "sin"
 
     def _eval(self):
-        return math.sin(self.a._eval())
+        return np.sin(self.a._eval())
 
 
 class Cos(SingularOp):
     op_type = "cos"
 
     def _eval(self):
-        return math.cos(self.a._eval())
+        return np.cos(self.a._eval())
 
 
 class Tan(SingularOp):
     op_type = "tan"
 
     def _eval(self):
-        return math.tan(self.a._eval())
+        return np.tan(self.a._eval())
 
+
+class Abs(SingularOp):
+    op_type = "abs"
+
+    def _eval(self):
+        return np.abs(self.a._eval())
 
 class LiteralContainer(GenericOp):
     def __init__(self, value: float, error: float):

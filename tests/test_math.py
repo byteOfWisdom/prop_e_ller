@@ -131,3 +131,9 @@ def test_vector_ops():
     assert (v + a == a + v).all()
     assert ((v / a) - (1. / (a / v)) < 0.001).all()
     assert (p.value(v * b) == v * p.value(b)).all()
+
+
+def test_misc_funcs():
+    a, b, c, d = default_values()
+    assert np.abs(a) == a
+    assert np.abs(c) == - c
