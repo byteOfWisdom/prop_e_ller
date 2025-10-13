@@ -183,11 +183,20 @@ class GenericOp:
     def __rtruediv__(self, other):
         return self._rop(Division, other)
 
+    def __pow__(self, other):
+        return self._lop(Power, other)
+
+    def __rpow__(self, other):
+        return self._rop(Power, other)
+
     def __neg__(self):
         return Number(0) - self
 
     def exp(self):
         return Exp(self)
+
+    def sqrt(self):
+        return self ** 0.5
 
     def log(self):
         return Log(self)
@@ -320,6 +329,13 @@ class Tan(SingularOp):
 
     def _eval(self):
         return math.tan(self.a._eval())
+
+
+class Power(DualOp):
+    op_type = "^"
+
+    def _eval(self):
+        return self.a._eval() ** self.b._eval()
 
 
 class Abs(SingularOp):

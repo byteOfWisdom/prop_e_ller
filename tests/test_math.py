@@ -137,3 +137,12 @@ def test_misc_funcs():
     a, b, c, d = default_values()
     assert np.abs(a) == a
     assert np.abs(c) == - c
+    assert np.floor(p.ev(1.5, 1)) == 1.
+
+
+def test_powers():
+    a, b, c, d = default_values()
+
+    assert ~(a ** 2) == 1
+    assert ~(b ** d) == 1
+    assert ~(np.sqrt(b)) - np.sqrt(2) < 0.0001
