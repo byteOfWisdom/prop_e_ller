@@ -6,8 +6,9 @@ import numpy as np
 
 
 def varname(i: int):
-    lut = "abcdefghij"
-    return "".join([lut[int(n)] for n in str(i)])
+    #lut = "abcdefghij"
+    # return "".join([lut[int(n)] for n in str(i)])
+    return "x" + str(i)
 
 
 def ev(value, error):
@@ -38,6 +39,10 @@ def value(x):
 
 def sq(x):
     return x * x
+
+
+def within_sigma(x, y, n_sigma=1):
+    return np.abs(~x - ~y) < n_sigma * (error(x) + error(y))
 
 
 def is_primitive_num(x):
@@ -131,6 +136,12 @@ class GenericOp:
 
     def __lt__(self, other):
         return self._comp(other, lambda x, y: x < y)
+
+    def __ge__(self, other):
+        return self._comp(other, lambda x, y: x >= y)
+
+    def __le__(self, other):
+        return self._comp(other, lambda x, y: x <= y)
 
 
     def _rop(self, op, other):
@@ -314,7 +325,7 @@ class LiteralContainer(GenericOp):
         # if list_like(value):
         #     pass
         self.value = value
-        self.error = error
+        self.error = np.abs(error)
 
     # def vec(self):
     #     return list_like(self.value)
