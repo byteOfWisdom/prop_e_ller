@@ -6,7 +6,7 @@ import numpy as np
 
 
 def varname(i: int):
-    #lut = "abcdefghij"
+    # lut = "abcdefghij"
     # return "".join([lut[int(n)] for n in str(i)])
     return "x" + str(i)
 
@@ -26,7 +26,7 @@ def ve(generic_expr):
         values = np.array([v for v, _ in map(ve, generic_expr)])
         return values, errors
     return generic_expr(), generic_expr._cal_error()
-    
+
 
 def error(x):
     return x._cal_error()
@@ -55,7 +55,6 @@ class GenericOp:
     def __float__(self):
         return self._eval()
 
-
     def __call__(self):
         return self._eval()
 
@@ -64,23 +63,20 @@ class GenericOp:
     def __invert__(self):
         return self._eval()
 
-
     def all_vars(self):
         return self._vars()
-
 
     def _cal_error(self):
         sym_eq, vars = self._to_symbolic_eq()
         error_sq = 0.
-            
-        sub_vars = [(sympy.Symbol(str(v)), v.value) for v in vars]
+
+        sub_vars = [(sympy.Symbol(str(v)), float(v.value)) for v in vars]
         for var in vars:
             partial = sympy.diff(sym_eq, str(var))
             partial = partial.subs(sub_vars)
             error_sq += sq(float(partial)) * sq(var.error)
 
         return np.sqrt(error_sq)
-
 
     def _to_symbolic_eq(self):
         # eq = sympy.parsing.sympy_parser.parse_expr(str(self), evaluate=False)
@@ -94,7 +90,6 @@ class GenericOp:
                 sym_eq = sym_eq.subs(str(v), float(v))
                 vars.remove(v)
 
-
         # every occurance of a variable gets a different name
         # these have to be deduplicated in order to achieve correct results
         dedup_vars = []
@@ -103,19 +98,16 @@ class GenericOp:
                 alt_names = [str(vn) for vn in filter(lambda x: x == v, vars)]
                 for a_name in alt_names:
                     sym_eq = sym_eq.subs(a_name, str(v))
-                    
+
             dedup_vars.append(v)
 
         return sym_eq, dedup_vars
 
-    
     def __int__(self):
         return int(float(self))
 
-
     def __str__(self):
         return "not implemented!!!"
-
 
     def __repr__(self):
         return str(self)
@@ -143,7 +135,6 @@ class GenericOp:
     def __le__(self, other):
         return self._comp(other, lambda x, y: x <= y)
 
-
     def _rop(self, op, other):
         if is_primitive_num(other):
             return op(Number(other), self)
@@ -157,7 +148,6 @@ class GenericOp:
         if list_like(other):
             return np.array([op(self, elem) for elem in other])
         return op(self, other)
-
 
     def __add__(self, other):
         return self._lop(Addition, other)
@@ -173,7 +163,7 @@ class GenericOp:
 
     def __sub__(self, other):
         return self._lop(Subtraction, other)
-    
+
     def __rsub__(self, other):
         return self._rop(Subtraction, other)
 
@@ -220,7 +210,6 @@ class GenericOp:
         self.id += n
 
 
-    
 class DualOp(GenericOp):
     def __init__(self, a, b):
         self.a = copy.deepcopy(a)
@@ -344,6 +333,7 @@ class Abs(SingularOp):
     def _eval(self):
         return math.fabs(self.a._eval())
 
+
 class LiteralContainer(GenericOp):
     def __init__(self, value: float, error: float):
         super().__init__()
@@ -359,8 +349,6 @@ class LiteralContainer(GenericOp):
         return self.value
 
     def __eq__(self, other):
-        # if self.vec() or other.vec():
-        #     return (self.value == other.value).all() and (self.error == other.error).all()
         return (self.value == other.value) and (self.error == other.error)
 
 
@@ -387,4 +375,3 @@ class Number(LiteralContainer):
 
     def _varcount(self):
         return 0
-
