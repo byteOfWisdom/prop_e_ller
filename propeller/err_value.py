@@ -73,7 +73,10 @@ class GenericOp:
         sub_vars = [(sympy.Symbol(str(v)), float(v.value)) for v in vars]
         for var in vars:
             partial = sympy.diff(sym_eq, str(var))
+            # print(partial)
+            # print(sub_vars)
             partial = partial.subs(sub_vars)
+
             error_sq += sq(float(partial)) * sq(var.error)
 
         return np.sqrt(error_sq)
