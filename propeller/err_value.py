@@ -115,6 +115,21 @@ class GenericOp:
     def __repr__(self):
         return str(self)
 
+    def format(self, strict=True):
+        value, error = ve(self)
+        oom = -math.floor(math.log10(value))
+        # while round(error * 10**oom) == 0 or round(value * 10**oom) == 0:
+            # oom += 1
+        value *= 10**oom
+        error *= 10**oom
+        rv = 0
+        while round(error, rv) == 0:
+            rv += 1
+
+        if rv == 0:
+            return f"{round(value)}({round(error)})e{-oom}"
+        return f"{round(value, rv)}({round(error, rv)})e{-oom}"
+
     def _comp(self, other, op):
         if not isinstance(other, GenericOp):
             return op(~self, other)
