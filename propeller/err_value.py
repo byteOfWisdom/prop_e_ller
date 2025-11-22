@@ -77,7 +77,10 @@ class GenericOp:
             # print(sub_vars)
             partial = partial.subs(sub_vars)
 
+            # try:
             error_sq += sq(float(partial)) * sq(var.error)
+            # except TypeError:
+                # print(partial)
 
         return np.sqrt(error_sq)
 
@@ -221,6 +224,9 @@ class GenericOp:
     def tan(self):
         return Tan(self)
 
+    def arctan(self):
+        return Arctan(self)
+
     def __abs__(self):
         return Abs(self)
 
@@ -336,6 +342,13 @@ class Tan(SingularOp):
 
     def _eval(self):
         return math.tan(self.a._eval())
+
+
+class Arctan(SingularOp):
+    op_type = "atan"
+
+    def _eval(self):
+        return math.atan(self.a._eval())
 
 
 class Power(DualOp):
