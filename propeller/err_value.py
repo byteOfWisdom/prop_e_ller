@@ -121,6 +121,7 @@ class GenericOp:
     def format(self, strict=True):
         value, error = ve(self)
         oom = -math.floor(math.log10(value))
+        oom_e = -math.floor(math.log10(error))
         # while round(error * 10**oom) == 0 or round(value * 10**oom) == 0:
             # oom += 1
         value *= 10**oom
