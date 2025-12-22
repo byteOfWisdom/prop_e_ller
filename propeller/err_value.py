@@ -3,6 +3,7 @@ import sympy
 import math
 from propeller.util import list_like
 import numpy as np
+from uncertainties import ufloat # just for the format print lol
 
 
 def varname(i: int):
@@ -116,23 +117,13 @@ class GenericOp:
         return "not implemented!!!"
 
     def __repr__(self):
-        return str(self)
+        return self.format()
+        # return str(self)
 
-    def format(self, strict=True):
+    def format(self):
         value, error = ve(self)
-        oom = -math.floor(math.log10(value))
-        oom_e = -math.floor(math.log10(error))
-        # while round(error * 10**oom) == 0 or round(value * 10**oom) == 0:
-            # oom += 1
-        value *= 10**oom
-        error *= 10**oom
-        rv = 0
-        while round(error, rv) == 0:
-            rv += 1
-
-        if rv == 0:
-            return f"{round(value)}({round(error)})e{-oom}"
-        return f"{round(value, rv)}({round(error, rv)})e{-oom}"
+        temp = ufloat(value, error)
+        return '{:.2uS}'.format(temp)
 
     def _comp(self, other, op):
         if not isinstance(other, GenericOp):
