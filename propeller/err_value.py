@@ -120,10 +120,11 @@ class GenericOp:
         return self.format()
         # return str(self)
 
-    def format(self):
+    def format(self, e_digits=2):
         value, error = ve(self)
         temp = ufloat(value, error)
-        return '{:.2uS}'.format(temp)
+        fmt_string = '{:.' + str(int(e_digits)) + 'uS}'
+        return fmt_string.format(temp)
 
     def _comp(self, other, op):
         if not isinstance(other, GenericOp):
