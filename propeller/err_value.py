@@ -30,7 +30,8 @@ def ve(generic_expr):
 
 
 def error(x):
-    return x._cal_error()
+    return ve(x)[1]
+    # return x._cal_error()
 
 
 def value(x):
