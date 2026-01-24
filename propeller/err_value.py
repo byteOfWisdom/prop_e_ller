@@ -29,6 +29,11 @@ def ve(generic_expr):
     return generic_expr(), generic_expr._cal_error()
 
 
+# aliases
+make_ev = ev
+split_ev = ve
+
+
 def error(x):
     return ve(x)[1]
     # return x._cal_error()
