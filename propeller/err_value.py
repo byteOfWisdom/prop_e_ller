@@ -29,6 +29,14 @@ def ve(generic_expr):
     return generic_expr(), generic_expr._cal_error()
 
 
+def from_string(s):
+    value = float(s.split("(")[0])
+    err = float(s.split("(")[1].split(")")[0])
+    exponent = s.split("(")[1].split(")")[1]
+    exponent = float("1" + exponent) if exponent != "" else 1
+    return ev(value * exponent, err * exponent)
+
+
 # aliases
 make_ev = ev
 split_ev = ve
