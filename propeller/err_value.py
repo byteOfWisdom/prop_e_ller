@@ -30,6 +30,8 @@ def ve(generic_expr):
 
 
 def from_string(s):
+    if "(" not in s:
+        return float(s)
     value = float(s.split("(")[0])
     err = float(s.split("(")[1].split(")")[0])
     exponent = s.split("(")[1].split(")")[1]
