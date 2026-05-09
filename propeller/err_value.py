@@ -32,8 +32,14 @@ def ve(generic_expr):
 def from_string(s):
     if "(" not in s:
         return float(s)
-    value = float(s.split("(")[0])
-    err = float(s.split("(")[1].split(")")[0])
+    value_str = s.split("(")[0]
+    value = float(value_str)
+    err_str = s.split("(")[1].split(")")[0]
+    if "." in value_str and "." not in err_str:
+        n = len(value_str.split(".")[1]) - len(err_str)
+        err_str = "0." + ("0" * n) + err_str
+    err = float(err_str)
+
     exponent = s.split("(")[1].split(")")[1]
     exponent = float("1" + exponent) if exponent != "" else 1
     return ev(value * exponent, err * exponent)

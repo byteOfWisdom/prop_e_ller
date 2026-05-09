@@ -8,7 +8,8 @@ import random
 
 
 def test_from_string():
-    for _ in range(10000):
-        a, b = random.random() * 1e3, random.random() * 1e3
-        test_value = p.ev(a, b)
+    for e in [1, 10, 0.1, 0.01, 1e-4]:
+        test_value = p.ev(1, e)
+        assert p.value(test_value) == p.value(p.from_string(test_value.format()))
+        assert p.error(test_value) == p.error(p.from_string(test_value.format()))
         assert p.within_sigma(test_value, p.from_string(test_value.format()))
