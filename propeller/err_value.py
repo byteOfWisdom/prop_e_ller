@@ -26,7 +26,7 @@ def ve(generic_expr):
         errors = np.array([e for _, e in map(ve, generic_expr)])
         values = np.array([v for v, _ in map(ve, generic_expr)])
         return values, errors
-    return generic_expr(), generic_expr._cal_error()
+    return ~generic_expr, generic_expr._cal_error()
 
 
 def from_string(s):
